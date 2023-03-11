@@ -1,5 +1,10 @@
 import { open } from 'node:fs/promises';
 
+/**
+ * 
+ * @param {URL} path 
+ * @returns 
+ */
 export async function readJson(path) {
   let file;
   try {
