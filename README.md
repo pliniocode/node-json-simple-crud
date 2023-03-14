@@ -93,3 +93,64 @@ Por fim, escrevemos os dados no nosso arquivo `json`, por meio do `fs.writeFile(
 
 Nesta implementação eu quebrei a cabeça na chamada do método `fs.writeFile()`. O motivo é que eu simplesmente chamava ele, sem ser no contexto do `return`. Assim, acabou por causar erro no fluxo de execução. Por manter a chamada da função ativa, juntamento com a chamada da minha função `readJson`. Essa que eu chamava novamente para abrir o mesmo arquivo que, ainda, estava sendo manuseado pela chamada do `fs.writeFile()`. 
 Bem, é o que acho que motivava o erro, talvez eu esteja errado. 
+
+
+## Alterando informações do arquivo `.json`
+
+Agora vamos implementar a funcionalidade de alterar alguma informação já salvo no aquivo `json`. Aqui, estaremos tratando da funcionalidade ***UPDATE*** do **CRUD**. 
+Para tanto, fiz escrevi o seguinte código: 
+
+```js 
+import { writeFile } from 'node:fs/promises';
+import { readJson } from './read-json.js';
+
+/**
+ *
+ * @param {URL} path
+ * @param {int | string} id
+ * @param {object} dataToUpdate
+ * @returns {void | undefined}
+ */
+
+export async function update(path, id, dataToUpdate) {
+  try {
+    let data = await readJson(path) ?? [];
+    const index = data.findIndex((row) => row.id === id);
+    if (index > -1 ) {
+      data[index] = {id, ...dataToUpdate};
+      const dataUpdated = JSON.stringify(data);
+      return await writeFile(path, dataUpdated);
+    }
+    return undefined;
+  } catch (error) {
+    return error;
+  }
+}
+```
+
+Aqui interessa explicar a lógica de alteração presente dentro do `try`. Cumpre, apenas, anotar sobre os argumentos, que são: o caminho do arquivo, o id do dado a ser alterado e os novos dados objetos da alteração/atualização. 
+
+Primeiro, é carregado os dados do arquivo na memória: 
+
+```js 
+let data = await readJson(path) ?? [];
+```
+
+Em seguida, é feita uma busca do *index* da informação a ser alterada nos dados já carregados na memória, disponíveis por meio da variável `data`. Se encontrou, retorna o *index*, caso contrário, retorna `-1`. 
+
+```js 
+const index = data.findIndex((row) => row.id === id);
+```
+
+Após, é verificado se *index* tem o valor maior que 1 (um), caso, sim, o dado já persistido é alterado.
+Por fim, os dados, com a informação alterada, são convertidos para o formato *JSON* e salvos no arquivo.  
+
+```js 
+if (index > -1 ) {
+      data[index] = {id, ...dataToUpdate};
+      const dataUpdated = JSON.stringify(data);
+      return await writeFile(path, dataUpdated);
+    }
+```
+
+Por outro lado, caso não seja encontrado algum ID correspondente, é retornado `undefined`.
