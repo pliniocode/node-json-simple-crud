@@ -154,3 +154,58 @@ if (index > -1 ) {
 ```
 
 Por outro lado, caso não seja encontrado algum ID correspondente, é retornado `undefined`.
+
+## Apagando informações do arquivo `.json`.
+
+A última implementação é a funcionalidade **DELETE** do **CRUD**. 
+Vejamos o código escrito:
+
+```js 
+import { writeFile } from 'node:fs/promises';
+import { readJson } from './read-json.js';
+  
+/**
+ *
+ * @param {URL} path
+ * @param {int | string} id
+ * @returns {void | undefined}
+ */
+
+export async function remove(path, id) {
+  try {
+    let data = await readJson(path) ?? [];
+    const index = data.findIndex((row) => row.id === id);
+    if (index > -1 ) {
+      const dataChanged = data.filter((row) => row.id !== id );
+      const changedData = JSON.stringify(dataChanged);
+      return await writeFile(path, changedData);
+    }
+    return undefined;
+  } catch (error) {
+    return error;
+  }
+}
+```
+
+Nesta, a implementação se dá através da função `remove()` que tem como parâmetros: o caminho do arquivo e o *id* da informação a ser deletada. 
+Como se pode ver, primeiro, é verificado se o dado a ser removido existe, caso não, retorna-se `undefined`. 
+
+Por outro lado, na situação em que haver o dado a ser removido da persistência, é executado a lógica de remoção. 
+
+```js 
+if (index > -1 ) {
+      const dataChanged = data.filter((row) => row.id !== id );
+      const changedData = JSON.stringify(dataChanged);
+      return await writeFile(path, changedData);
+    }
+```
+
+É executado um filtro sobre os dados para ser retornado apenas aqueles que o `id` diferir do `id` recebido, como argumento. 
+
+O resultado do filtro é armazenado na variável  `dataChanged`, que, em seguida, é convertida para o formato `JSON` e salvo na variável `changedData`.
+
+Por fim, os dados são salvos no arquivo responsável por persistir as informações. 
+
+## Conclusão
+
+Este escrito tem o intuito de servir como anotação dos meus estudos de manipulação de arquivos no ambiente do Node.js. Não tem a intenção de ser um tutorial.
